@@ -55,8 +55,6 @@ class Conexao:
         self.porta2Text.pack(side = Tk.RIGHT)
         self.b_porta.pack(padx = 8, pady=5)
 
-
-
     def conecta(self):
         host = self.ipText.get()     # Endereco IP do Servidor
         port = int(self.portaText.get())  # Porta que o Servidor esta
@@ -69,7 +67,6 @@ class Conexao:
         self.master.withdraw()
         self.newWindow = Tk.Toplevel(self.master)
         self.app = selecao(self.newWindow, self.master, host, port, usuario, minhaPorta)
-        
 
 class selecao:
     def __init__(self, master, conexaoMaster, host, port, usuario, minhaPorta):
@@ -78,6 +75,10 @@ class selecao:
 
         self.master = master
         self.conexaoMaster = conexaoMaster
+        self.host = host
+        self.port = port
+        self.usuario = usuario
+        self.minhaPorta = minhaPorta
 
         self.master.wm_title("conexão com servidor")
         self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
@@ -98,21 +99,49 @@ class selecao:
         self.espaco.pack()
         self.b_porta2.pack(side = Tk.BOTTOM, padx = 8, pady = 5)
         
-        t = threading.Thread(target=self.userLoop, args=(usuario, minhaPorta))
-        t.daemon = True
-        t.start()
+        self.comando = []
+        
+        self.t1 = threading.Thread(target=self.userLoop, args=())
+        self.t1.daemon = True
+        self.t1.start()
 
-    def userLoop(self, usuario, minhaPorta): 
-        conexao = "USER " + usuario + " " + minhaPorta
+        self.t2 = threading.Thread(target=self.conversa, args=())
+        self.t2.daemon = True
+        self.t2.start()
+
+    def conversa(self):                        
+        while (True):
+            msg, cliente = self.udp.recvfrom(1024)
+            self.comando = str(msg).split(" ")
+            self.comando[0] = self.comando[0][2:]
+            self.comando[-1] = self.comando[-1][0:-1]
+            print(self.comando)
+
+            if(self.comando[0] == "USER"):
+                if(self.comando[1] == "OK"):
+                    self.udp.sendto(b"LIST", self.dest)
+                elif(self.comando[1] == "NOK"):
+                    print("no")
+                    self.conexaoMaster.deiconify()
+                    self.master.withdraw()
+                    break
+            elif(self.comando[0] == "LIST"):
+                print("lista")
+
+    def userLoop(self): 
+        conexao = "USER " + self.usuario + " " + self.minhaPorta
         print(conexao)
         while (True):
             self.udp.sendto(bytes(conexao, encoding='utf8'), self.dest) 
             time.sleep(10)
-        self.udp.close()
+            if (self.comando[1] == "NOK"):
+                break
         
     def close_windows(self):
-        #self.conexaoMaster.deiconify()
+        self.udp.close()
+        self.udp.sendto(b"EXIT", self.self.udp.close()dest) 
         self.conexaoMaster.destroy()
+
 
 def main(): 
     root = Tk.Tk()
