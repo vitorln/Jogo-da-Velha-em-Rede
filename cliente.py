@@ -112,6 +112,7 @@ class selecao:
     def conversa(self):                        
         while (True):
             msg, cliente = self.udp.recvfrom(1024)
+            print(msg)
             self.comando = str(msg).split(" ")
             self.comando[0] = self.comando[0][2:]
             self.comando[-1] = self.comando[-1][0:-1]
@@ -126,7 +127,7 @@ class selecao:
                     self.master.withdraw()
                     break
             elif(self.comando[0] == "LIST"):
-                print("lista")
+                print('LISTA')
 
     def userLoop(self): 
         conexao = "USER " + self.usuario + " " + self.minhaPorta
@@ -136,10 +137,10 @@ class selecao:
             time.sleep(10)
             if (self.comando[1] == "NOK"):
                 break
-        
     def close_windows(self):
+       
+        self.udp.sendto(b"EXIT", self.dest) 
         self.udp.close()
-        self.udp.sendto(b"EXIT", self.self.udp.close()dest) 
         self.conexaoMaster.destroy()
 
 
