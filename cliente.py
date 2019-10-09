@@ -112,7 +112,6 @@ class selecao:
     def conversa(self):                        
         while (True):
             msg, cliente = self.udp.recvfrom(1024)
-            print(msg)
             self.comando = str(msg).split(" ")
             self.comando[0] = self.comando[0][2:]
             self.comando[-1] = self.comando[-1][0:-1]
@@ -122,7 +121,6 @@ class selecao:
                 if(self.comando[1] == "OK"):
                     self.udp.sendto(b"LIST", self.dest)
                 elif(self.comando[1] == "NOK"):
-                    print("no")
                     self.conexaoMaster.deiconify()
                     self.master.withdraw()
                     break
@@ -135,8 +133,9 @@ class selecao:
         while (True):
             self.udp.sendto(bytes(conexao, encoding='utf8'), self.dest) 
             time.sleep(10)
-            if (self.comando[1] == "NOK"):
-                break
+            if (len(self.comando) == 2):
+                if (self.comando[1] == "NOK"):
+                    break
     def close_windows(self):
        
         self.udp.sendto(b"EXIT", self.dest) 
