@@ -85,19 +85,18 @@ class selecao:
         self.container = Tk.Frame(self.master)
         self.lista = Tk.Listbox(self.container)
         self.container2 = Tk.Frame(self.container)
-        self.b_porta = Tk.Button(self.container2, text="partida selecionada" ,bg="blue", fg="white", width=15)
-        self.b_porta1 = Tk.Button(self.container2, text="partida aleatoria" ,bg="blue", fg="white", width=15)
-        self.b_porta1 = Tk.Button(self.container2, text="partida aleatoria" ,bg="blue", fg="white", width=15)
+        self.b_select = Tk.Button(self.container2, text="partida selecionada" ,command=self.selecionado, bg="blue", fg="white", width=15)
+        self.b_rand = Tk.Button(self.container2, text="partida aleatoria", command=self.aleatorio,bg="blue", fg="white", width=15)
         self.espaco = Tk.LabelFrame(self.container2, height = 50)
-        self.b_porta2 = Tk.Button(self.container2, text="Sair", command=self.close_windows, bg="red", fg="white", width=15)
+        self.b_sair = Tk.Button(self.container2, text="Sair", command=self.close_windows, bg="red", fg="white", width=15)
 
         self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)
         self.lista.pack(side = Tk.LEFT, padx = 8, pady=5)
         self.container2.pack(side = Tk.LEFT)
-        self.b_porta.pack(padx = 8, pady=5)
-        self.b_porta1.pack(padx = 8, pady=5)
+        self.b_select.pack(padx = 8, pady=5)
+        self.b_rand.pack(padx = 8, pady=5)
         self.espaco.pack()
-        self.b_porta2.pack(side = Tk.BOTTOM, padx = 8, pady = 5)
+        self.b_sair.pack(side = Tk.BOTTOM, padx = 8, pady = 5)
         
         self.comando = []
         
@@ -125,7 +124,10 @@ class selecao:
                     self.master.withdraw()
                     break
             elif(self.comando[0] == "LIST"):
-                print('LISTA')
+                self.lista.delete('0','end')
+                tam = int(self.comando[1])
+                for i in range(2, tam + 2):
+                    self.lista.insert(1, self.comando[i])
 
     def userLoop(self): 
         conexao = "USER " + self.usuario + " " + self.minhaPorta
@@ -141,6 +143,12 @@ class selecao:
         self.udp.sendto(b"EXIT", self.dest) 
         self.udp.close()
         self.conexaoMaster.destroy()
+
+    def aleatorio(self):
+        print("foi rand")
+
+    def selecionado(self):
+        print("foi select")
 
 
 def main(): 
