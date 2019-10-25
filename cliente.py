@@ -192,12 +192,36 @@ class selecao:
             resposta = str(resposta).split(" ")
             resposta[0] = resposta[0][2:]
             resposta[-1] = resposta[-1][0:-1]
-            if (resposta[1] == "START"):
+            if (resposta[0] == "START"):
                 self.udp.sendto(b"EXIT", self.dest)
                 self.udp.close()
                 self.master.withdraw()
                 self.newWindow = Tk.Toplevel(self.master)
                 self.app = jogo(self.newWindow, self.conexaoMaster, tcp_connect)
+            elif(resposta[0] == "BYE"):
+                self.newWindow = Tk.Toplevel(self.master)
+                self.app = recusa(self.newWindow)
+
+class recusa:
+    def __init__(self, master):
+
+        self.master = master
+        self.master.wm_title("conexão com servidor")
+        self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
+        
+        self.container = Tk.Frame(self.master)
+        self.container1 = Tk.Frame(self.container)
+        self.lbl = Tk.Label(self.container, text="O jogador recusou o convite")
+        self.b_nega = Tk.Button(self.container1, text="Rejeitar",bg="red", fg="white", command = self.__retorna)
+
+        self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)        
+        self.lbl.pack(side = Tk.TOP, padx = 8, pady=5)
+        self.container1.pack()
+        self.b_nega.pack(side = Tk.LEFT, padx = 8, pady=5)
+
+    def __retorna(self):
+        self.master.withdraw()
+
 
 class convite:
     def __init__(self, master, conexaoMaster, desafiante, tcp):
@@ -223,10 +247,12 @@ class convite:
     def __regeita(self):
         print("regeita")
         self.tcp.send(b"BYE")
+        self.master.withdraw()
 
     def __aceita(self):
         print("aceita")
         self.tcp.send(b"START OK")
+        self.master.withdraw()
     
 
 
