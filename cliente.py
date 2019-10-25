@@ -187,8 +187,10 @@ class selecao:
         try:
             select = self.lista.get(self.lista.curselection())
             select = select.split(":")
-            oponente = (select[1:2], int(select[2:])
-            self.tcp.connect(oponente)
+            print(select)
+            #oponente = (select[1:2], int(select[2:])
+            #print(oponente)
+            #self.tcp.connect(oponente)
             self.tcp.send("START " + select[0])
 
             self.udp.sendto(b"EXIT", self.dest)
