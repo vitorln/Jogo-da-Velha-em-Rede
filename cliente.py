@@ -82,6 +82,12 @@ class selecao:
         self.usuario = usuario
         self.minhaPorta = minhaPorta
 
+        self.ip = IP_MAQUINA
+        #self.ip = get('https://api.ipify.org').text  # Endereco IP da maquina
+        self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        orig = (self.ip, int(self.minhaPorta))
+        self.tcp.bind(orig)
+
         self.master.wm_title("conexão com servidor")
         self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
         self.container = Tk.Frame(self.master)
@@ -150,20 +156,16 @@ class selecao:
                     break
     
     def __convite(self):
-        self.ip = IP_MAQUINA
-        #self.ip = get('https://api.ipify.org').text  # Endereco IP da maquina
-        self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        orig = (self.ip, int(self.minhaPorta))
-        self.tcp.bind(orig)
         self.tcp.listen(1)
-        while(true):
-            self.con, self.cliente = tcp.accept()
+        while(True):
+            self.con, self.cliente = self.tcp.accept()
             mensagem  = self.con.recv(1024)
             print (mensagem)
             mensagem = str(mensagem).split(" ")
             mensagem[0] = mensagem[0][2:]
             mensagem[-1] = mensagem[-1][0:-1]
             if (mensagem[0] == "START"):
+                print('')
                 
             
 
@@ -185,9 +187,10 @@ class selecao:
         try:
             select = self.lista.get(self.lista.curselection())
             select = select.split(":")
-            oponente = (select[1], int(select[2])
-            tcp.connect(oponente)
-            tcp.send("START " + select[0])
+            oponente = (select[1:2], int(select[2:])
+            self.tcp.connect(oponente)
+            self.tcp.send("START " + select[0])
+
             self.udp.sendto(b"EXIT", self.dest)
             self.udp.close()
             self.master.withdraw()
