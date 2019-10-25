@@ -4,6 +4,8 @@ import socket
 import time
 import threading
 
+IP_MAQUINA = '10.81.112.113'
+
 class Conexao:
     def __init__(self, master):
         self.arq = open('./Servidor.txt', 'r')
@@ -38,7 +40,7 @@ class Conexao:
         self.container4 = Tk.Frame(self.container)
         self.lbl4 = Tk.Label(self.container4, text="Sua porta: ", anchor = Tk.W, width = 18)
         self.porta2Text = Tk.Entry(self.container4,width=15, textvariable = self.porta2)
-        self.b_porta = Tk.Button(self.container, text="conectar", command=self.conecta ,bg="blue", fg="white")
+        self.b_porta = Tk.Button(self.container, text="conectar", command=self.__conecta ,bg="blue", fg="white")
 
         self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)        
         self.container1.pack()
@@ -55,7 +57,7 @@ class Conexao:
         self.porta2Text.pack(side = Tk.RIGHT)
         self.b_porta.pack(padx = 8, pady=5)
 
-    def conecta(self):
+    def __conecta(self):
         host = self.ipText.get()     # Endereco IP do Servidor
         port = int(self.portaText.get())  # Porta que o Servidor esta
         usuario = self.nickText.get()
@@ -85,10 +87,10 @@ class selecao:
         self.container = Tk.Frame(self.master)
         self.lista = Tk.Listbox(self.container)
         self.container2 = Tk.Frame(self.container)
-        self.b_select = Tk.Button(self.container2, text="partida selecionada" ,command=self.selecionado, bg="blue", fg="white", width=15)
-        self.b_rand = Tk.Button(self.container2, text="partida aleatoria", command=self.aleatorio,bg="blue", fg="white", width=15)
+        self.b_select = Tk.Button(self.container2, text="partida selecionada" ,command=self.__selecionado, bg="blue", fg="white", width=15)
+        self.b_rand = Tk.Button(self.container2, text="partida aleatoria", command=self.__aleatorio,bg="blue", fg="white", width=15)
         self.espaco = Tk.LabelFrame(self.container2, height = 50)
-        self.b_sair = Tk.Button(self.container2, text="Sair", command=self.close_windows, bg="red", fg="white", width=15)
+        self.b_sair = Tk.Button(self.container2, text="Sair", command=self.__close_windows, bg="red", fg="white", width=15)
 
         self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)
         self.lista.pack(side = Tk.LEFT, padx = 8, pady=5)
@@ -100,15 +102,19 @@ class selecao:
         
         self.comando = []
         
-        self.t1 = threading.Thread(target=self.userLoop, args=())
+        self.t1 = threading.Thread(target=self.__userLoop, args=())
         self.t1.daemon = True
         self.t1.start()
 
-        self.t2 = threading.Thread(target=self.conversa, args=())
+        self.t2 = threading.Thread(target=self.__conversa, args=())
         self.t2.daemon = True
         self.t2.start()
 
-    def conversa(self):                        
+        self.t3 = threading.Thread(target=self.__convite, args=())
+        self.t3.daemon = True
+        self.t3.start()
+
+    def __conversa(self):                        
         while (True):
             msg, cliente = self.udp.recvfrom(1024)
             self.comando = str(msg).split(" ")
@@ -127,28 +133,167 @@ class selecao:
                 self.lista.delete('0','end')
                 tam = int(self.comando[1])
                 for i in range(2, tam + 2):
-                    self.lista.insert(1, self.comando[i])
+                    if(self.comando[i] != self.usuario + ":" + IP_MAQUINA + ":" + self.minhaPorta):
+                        self.lista.insert(1, self.comando[i])
 
-    def userLoop(self): 
+    def __userLoop(self): 
         conexao = "USER " + self.usuario + " " + self.minhaPorta
         print(conexao)
         while (True):
-            self.udp.sendto(bytes(conexao, encoding='utf8'), self.dest) 
+            try:
+                self.udp.sendto(bytes(conexao, encoding='utf8'), self.dest) 
+            except:
+                break
             time.sleep(10)
             if (len(self.comando) == 2):
                 if (self.comando[1] == "NOK"):
                     break
-    def close_windows(self):
+    
+    def __convite(self):
+        self.ip = IP_MAQUINA
+        #self.ip = get('https://api.ipify.org').text  # Endereco IP da maquina
+        self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        orig = (self.ip, int(self.minhaPorta))
+        self.tcp.bind(orig)
+        self.tcp.listen(1)
+        while(true):
+            self.con, self.cliente = tcp.accept()
+            mensagem  = self.con.recv(1024)
+            
+
+    def __close_windows(self):
        
         self.udp.sendto(b"EXIT", self.dest) 
         self.udp.close()
         self.conexaoMaster.destroy()
 
-    def aleatorio(self):
+    def __aleatorio(self):
         print("foi rand")
+        self.udp.sendto(b"EXIT", self.dest)
+        self.udp.close()
+        self.master.withdraw()
+        self.newWindow = Tk.Toplevel(self.master)
+        self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp)
 
-    def selecionado(self):
-        print("foi select")
+    def __selecionado(self):
+        try:
+            select = self.lista.get(self.lista.curselection())
+            select = select.split(":")
+            tcp.connect(dest)
+
+            self.udp.sendto(b"EXIT", self.dest)
+            self.udp.close()
+            self.master.withdraw()
+            self.newWindow = Tk.Toplevel(self.master)
+            self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp)
+        except:
+            print("")
+
+
+class jogo:
+    def __init__(self, master, conexaoMaster, oi):
+        self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
+        self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
+        self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
+        
+        self.conexaoMaster = conexaoMaster
+        self.master = master
+        self.master.wm_title("Jogo Da Velha")
+        self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
+        self.container = Tk.Frame(self.master)
+        self.container1 = Tk.Frame(self.container, bg = "maroon")
+        self.b11 = Tk.Button(self.container1, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao11)
+        self.b12 = Tk.Button(self.container1, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao12)
+        self.b13 = Tk.Button(self.container1, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao13)     
+        self.container2 = Tk.Frame(self.container, bg = "maroon")
+        self.b21 = Tk.Button(self.container2, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao21)
+        self.b22 = Tk.Button(self.container2, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao22)
+        self.b23 = Tk.Button(self.container2, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao23)  
+        self.container3 = Tk.Frame(self.container, bg = "maroon")
+        self.b31 = Tk.Button(self.container3, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao31)
+        self.b32 = Tk.Button(self.container3, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao32)
+        self.b33 = Tk.Button(self.container3, bg="white", width = 100, height = 100, image = self.imagem_vazio, command = self.__botao33)
+        self.container4 = Tk.Frame(self.container)
+        self.vez_jogador = Tk.Label(self.container4, text="sua vez", width = 18, anchor = Tk.W)
+        self.b_sair = Tk.Button(self.container4, bg="red", fg="white", text = "sair", command = self.__close_windows)
+        
+
+        self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)  
+        self.container1.pack()
+        self.container2.pack()
+        self.container3.pack()
+        self.container4.pack()
+        self.vez_jogador.pack(side = Tk.LEFT, padx = 8, pady=5)
+        self.b_sair.pack(side = Tk.LEFT, padx = 8, pady=5)
+        self.b11.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b12.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b13.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b21.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b22.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b23.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b31.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b32.pack(side = Tk.LEFT, padx = 8, pady=8)
+        self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
+
+        self.flag_sua_vez = True 
+
+    
+    def __botao11(self):
+        self.__jogado(1, 1, self.imagem_O)
+
+    def __botao12(self):
+        self.__jogado(1, 2, self.imagem_O)
+
+    def __botao13(self):
+        self.__jogado(1, 3, self.imagem_O)
+ 
+    def __botao21(self):
+        self.__jogado(2, 1, self.imagem_O)
+
+    def __botao22(self):
+        self.__jogado(2, 2, self.imagem_O)
+
+    def __botao23(self):
+        self.__jogado(2, 3, self.imagem_O)
+
+    def __botao31(self):
+        self.__jogado(3, 1, self.imagem_O)
+
+    def __botao32(self):
+        self.__jogado(3, 2, self.imagem_O)
+
+    def __botao33(self):
+        self.__jogado(3, 3, self.imagem_O)
+
+    def __jogado(self, linha, coluna, imagem):
+        if  (linha == 1 and coluna == 1):
+            self.b11.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 1 and coluna == 2):
+            self.b12.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 1 and coluna == 3):
+            self.b13.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 2 and coluna == 1):
+            self.b21.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 2 and coluna == 2):
+            self.b22.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 2 and coluna == 3):
+            self.b23.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 3 and coluna == 1):
+            self.b31.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 3 and coluna == 2):
+            self.b32.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        elif  (linha == 3 and coluna == 3):
+            self.b33.config(bg="gray", image = imagem, state = Tk.DISABLED)
+        
+        if (self.flag_sua_vez):
+            self.flag_sua_vez = False
+            self.vez_jogador.config(text = "Vez do oponente")
+        else:
+            self.flag_sua_vez = True
+            self.vez_jogador.config(text = "Sua vez")
+
+    def __close_windows(self):
+        self.conexaoMaster.destroy()
 
 
 def main(): 

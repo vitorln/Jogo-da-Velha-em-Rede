@@ -2,9 +2,10 @@ import socket
 import time
 import threading
 
+
 online = {}
-HOST_SERVIDOR = '127.0.0.1'     # Endereco IP do Servidor
-PORT_SERVIDOR = 5000           # Porta que o Servidor esta
+HOST_SERVIDOR = '10.81.112.113'     # Endereco IP do Servidor
+PORT_SERVIDOR = 5010        # Porta que o Servidor esta
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.bind((HOST_SERVIDOR, PORT_SERVIDOR))
 
