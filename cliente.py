@@ -159,6 +159,12 @@ class selecao:
         while(true):
             self.con, self.cliente = tcp.accept()
             mensagem  = self.con.recv(1024)
+            print (mensagem)
+            mensagem = str(mensagem).split(" ")
+            mensagem[0] = mensagem[0][2:]
+            mensagem[-1] = mensagem[-1][0:-1]
+            if (mensagem[0] == "START"):
+                
             
 
     def __close_windows(self):
@@ -179,8 +185,9 @@ class selecao:
         try:
             select = self.lista.get(self.lista.curselection())
             select = select.split(":")
-            tcp.connect(dest)
-
+            oponente = (select[1], int(select[2])
+            tcp.connect(oponente)
+            tcp.send("START " + select[0])
             self.udp.sendto(b"EXIT", self.dest)
             self.udp.close()
             self.master.withdraw()
