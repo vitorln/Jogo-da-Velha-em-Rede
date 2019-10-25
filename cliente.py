@@ -82,12 +82,6 @@ class selecao:
         self.usuario = usuario
         self.minhaPorta = minhaPorta
 
-        self.ip = IP_MAQUINA
-        #self.ip = get('https://api.ipify.org').text  # Endereco IP da maquina
-        self.tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        orig = (self.ip, int(self.minhaPorta))
-        self.tcp.bind(orig)
-
         self.master.wm_title("conexão com servidor")
         self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
         self.container = Tk.Frame(self.master)
@@ -156,19 +150,22 @@ class selecao:
                     break
     
     def __convite(self):
-        self.tcp.listen(1)
+        tcp_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        orig = (IP_MAQUINA, int(self.minhaPorta))
+        tcp_listen.bind(orig)
+
+        tcp_listen.listen(1)
         while(True):
-            self.con, self.cliente = self.tcp.accept()
+            self.con, self.cliente = tcp_listen.accept()
             mensagem  = self.con.recv(1024)
             print (mensagem)
             mensagem = str(mensagem).split(" ")
             mensagem[0] = mensagem[0][2:]
             mensagem[-1] = mensagem[-1][0:-1]
             if (mensagem[0] == "START"):
-                print('')
-                
-            
-
+                self.newWindow = Tk.Toplevel(self.master)
+                self.app = convite(self.newWindow, self.conexaoMaster, mensagem[1], self.con)
+                  
     def __close_windows(self):
        
         self.udp.sendto(b"EXIT", self.dest) 
@@ -181,25 +178,57 @@ class selecao:
         self.udp.close()
         self.master.withdraw()
         self.newWindow = Tk.Toplevel(self.master)
-        self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp)
+        self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp_connect)
 
     def __selecionado(self):
-        try:
+            tcp_connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             select = self.lista.get(self.lista.curselection())
             select = select.split(":")
-            print(select)
-            #oponente = (select[1:2], int(select[2:])
-            #print(oponente)
-            #self.tcp.connect(oponente)
-            self.tcp.send("START " + select[0])
+            oponente = (select[1], int(select[2]))
+            tcp_connect.connect((select[1], int(select[2])))
+            tcp_connect.send(bytes("START " + self.usuario, encoding='utf8'))
+            
+            resposta = tcp_connect.recv(1024)
+            resposta = str(resposta).split(" ")
+            resposta[0] = resposta[0][2:]
+            resposta[-1] = resposta[-1][0:-1]
+            if (resposta[1] == "START"):
+                self.udp.sendto(b"EXIT", self.dest)
+                self.udp.close()
+                self.master.withdraw()
+                self.newWindow = Tk.Toplevel(self.master)
+                self.app = jogo(self.newWindow, self.conexaoMaster, tcp_connect)
 
-            self.udp.sendto(b"EXIT", self.dest)
-            self.udp.close()
-            self.master.withdraw()
-            self.newWindow = Tk.Toplevel(self.master)
-            self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp)
-        except:
-            print("")
+class convite:
+    def __init__(self, master, conexaoMaster, desafiante, tcp):
+        self.desafiante = desafiante
+        self.tcp = tcp
+        self.conexaoMaster = conexaoMaster
+        self.master = master
+        self.master.wm_title("conexão com servidor")
+        self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
+        
+        self.container = Tk.Frame(self.master)
+        self.container1 = Tk.Frame(self.container)
+        self.lbl = Tk.Label(self.container, text= self.desafiante + " esta te desafianado! \nDeseja aceitar??")
+        self.b_confirma = Tk.Button(self.container1, text="Aceitar",bg="blue", fg="white", command = self.__aceita)
+        self.b_nega = Tk.Button(self.container1, text="Rejeitar",bg="red", fg="white", command = self.__regeita)
+
+        self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)        
+        self.lbl.pack(side = Tk.TOP, padx = 8, pady=5)
+        self.container1.pack()
+        self.b_confirma.pack(side = Tk.LEFT, padx = 8, pady=5)
+        self.b_nega.pack(side = Tk.LEFT, padx = 8, pady=5)
+
+    def __regeita(self):
+        print("regeita")
+        self.tcp.send(b"BYE")
+
+    def __aceita(self):
+        print("aceita")
+        self.tcp.send(b"START OK")
+    
+
 
 
 class jogo:
