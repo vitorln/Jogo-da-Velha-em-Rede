@@ -168,6 +168,7 @@ class selecao:
             print (mensagem)
             if (mensagem[0] == "START"):
                 self.newWindow = Tk.Toplevel(self.master)
+                self.master.withdraw()
                 self.app = convite(self.newWindow, self.conexaoMaster, mensagem[1], self.con, self.udp, self.dest)
             else:
                 self.con.close()
@@ -270,14 +271,14 @@ class convite:
         self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp, False)
     
 class jogo:
-    def __init__(self, master, conexaoMaster, tcp, desafiante = True):
+    def __init__(self, master, conexaoMaster, tcp, desafiante):
 
         self.tcp = tcp
         self.desafiante = desafiante
         self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
         self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
         self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
-        
+        self.tabuleiro = [[True, True, True], [True, True, True], [True, True, True]]
         self.conexaoMaster = conexaoMaster
         self.master = master
         self.master.wm_title("Jogo Da Velha")
@@ -317,32 +318,67 @@ class jogo:
         self.b32.pack(side = Tk.LEFT, padx = 8, pady=8)
         self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
 
-        self.flag_sua_vez = False
-        self.t1 = threading.Thread(target=self.__loopJogo, args=(self.desafiante))
+        self.flag_sua_vez = not desafiante
+        self.__flipaVez()
+        self.t1 = threading.Thread(target=self.__loopJogo, args=())
         self.t1.daemon = True
         self.t1.start()
         
 
-    def __loopJogo(self, desafiante):
+    def __loopJogo(self):
         while(True):
-            if(not desafiante):
-                self.__flipaVez(self.flag_sua_vez) 
+            if(self.desafiante == False):
+                self.desafiante = True
+                 
                 jogada = self.tcp.recv(1024)
                 jogada = str(jogada).split(" ")
                 jogada[0] = jogada[0][2:]
                 jogada[-1] = jogada[-1][0:-1]
+                print(jogada)
                 if(jogada[0] == "PLAY"):
                     self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
-                    desafiante = True
         
-    def __flipaVez(self, flag_sua_vez):
-        if (flag_sua_vez):
-            flag_sua_vez = False
+    def __flipaVez(self):
+        if (self.flag_sua_vez):
+            self.flag_sua_vez = False
             self.vez_jogador.config(text = "Vez do oponente")
+            self.__disableB()
         else:
-            flag_sua_vez = True
+            self.flag_sua_vez = True
             self.vez_jogador.config(text = "Sua vez")
+            self.__activeB()
 
+    def __activeB(self):
+        if(self.tabuleiro[0][0] == True):
+            self.b11.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[0][1] == True):
+            self.b12.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[0][2] == True):
+            self.b13.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[1][0] == True):
+            self.b21.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[1][1] == True):
+            self.b22.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[1][2] == True):
+            self.b23.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[2][0] == True):
+            self.b31.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[2][1] == True):
+            self.b32.config(state = Tk.ACTIVE)
+        if(self.tabuleiro[2][2] == True):
+            self.b33.config(state = Tk.ACTIVE)
+
+
+    def __disableB(self):
+        self.b11.config(state = Tk.DISABLED)
+        self.b12.config(state = Tk.DISABLED)
+        self.b13.config(state = Tk.DISABLED)
+        self.b21.config(state = Tk.DISABLED)
+        self.b22.config(state = Tk.DISABLED)
+        self.b23.config(state = Tk.DISABLED)
+        self.b31.config(state = Tk.DISABLED)
+        self.b32.config(state = Tk.DISABLED)
+        self.b33.config(state = Tk.DISABLED)
 
     def __botao11(self):
         self.__jogado(1, 1, self.imagem_O)
@@ -410,7 +446,8 @@ class jogo:
         elif  (linha == 3 and coluna == 3):
             self.b33.config(bg="gray", image = imagem, state = Tk.DISABLED)
         
-        __flipaVez(self.flag_sua_vez)
+        self.tabuleiro[linha - 1][coluna - 1] = False
+        self.__flipaVez()
 
     def __close_windows(self):
         self.conexaoMaster.destroy()
