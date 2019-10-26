@@ -184,6 +184,7 @@ class selecao:
         self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp_connect)
 
     def __selecionado(self):
+        try:
             tcp_connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             select = self.lista.get(self.lista.curselection())
             select = select.split(":")
@@ -205,6 +206,8 @@ class selecao:
                 self.newWindow = Tk.Toplevel(self.master)
                 self.app = recusa(self.newWindow)
                 tcp_connect.close()
+        except:
+            print("erro na seleção")
 
 class recusa:
     def __init__(self, master):
@@ -265,6 +268,9 @@ class convite:
     
 class jogo:
     def __init__(self, master, conexaoMaster, tcp, desafiante = True):
+
+        self.tcp = tcp
+
         self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
         self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
         self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
@@ -308,37 +314,64 @@ class jogo:
         self.b32.pack(side = Tk.LEFT, padx = 8, pady=8)
         self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
 
-        self.flag_sua_vez = True 
+        self.flag_sua_vez = False
+        while(True):
+            if(not desafiante):
+                self.__flipaVez(self.flag_sua_vez) 
+                jogada = self.tcp.recv(1024)
+                jogada = str(jogada).split(" ")
+                jogada[0] = jogada[0][2:]
+                jogada[-1] = jogada[-1][0:-1]
+                if(jogada[0] == "PLAY"):
+                    self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
+                    desafiante = True
 
-    
+    def __flipaVez(self, flag_sua_vez):
+        if (flag_sua_vez):
+            flag_sua_vez = False
+            self.vez_jogador.config(text = "Vez do oponente")
+        else:
+            flag_sua_vez = True
+            self.vez_jogador.config(text = "Sua vez")
+
+
     def __botao11(self):
         self.__jogado(1, 1, self.imagem_O)
-
+        self.tcp.send(b"PLAY 1 1")
     def __botao12(self):
         self.__jogado(1, 2, self.imagem_O)
+        self.tcp.send(b"PLAY 1 2")
 
     def __botao13(self):
         self.__jogado(1, 3, self.imagem_O)
+        self.tcp.send(b"PLAY 1 3")
  
     def __botao21(self):
         self.__jogado(2, 1, self.imagem_O)
+        self.tcp.send(b"PLAY 2 1")
 
     def __botao22(self):
         self.__jogado(2, 2, self.imagem_O)
+        self.tcp.send(b"PLAY 2 2")
 
     def __botao23(self):
         self.__jogado(2, 3, self.imagem_O)
+        self.tcp.send(b"PLAY 2 3")
 
     def __botao31(self):
         self.__jogado(3, 1, self.imagem_O)
+        self.tcp.send(b"PLAY 3 1")
 
     def __botao32(self):
         self.__jogado(3, 2, self.imagem_O)
+        self.tcp.send(b"PLAY 3 2")
 
     def __botao33(self):
         self.__jogado(3, 3, self.imagem_O)
+        self.tcp.send(b"PLAY 3 3")
 
     def __jogado(self, linha, coluna, imagem):
+
         if  (linha == 1 and coluna == 1):
             self.b11.config(bg="gray", image = imagem, state = Tk.DISABLED)
         elif  (linha == 1 and coluna == 2):
@@ -358,12 +391,7 @@ class jogo:
         elif  (linha == 3 and coluna == 3):
             self.b33.config(bg="gray", image = imagem, state = Tk.DISABLED)
         
-        if (self.flag_sua_vez):
-            self.flag_sua_vez = False
-            self.vez_jogador.config(text = "Vez do oponente")
-        else:
-            self.flag_sua_vez = True
-            self.vez_jogador.config(text = "Sua vez")
+        __flipaVez(self.flag_sua_vez)
 
     def __close_windows(self):
         self.conexaoMaster.destroy()
