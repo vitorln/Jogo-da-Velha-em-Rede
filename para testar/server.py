@@ -3,8 +3,8 @@ import time
 import threading
 
 
-online = {}
-HOST_SERVIDOR = '192.168.25.30'     # Endereco IP do Servidor
+online = []
+HOST_SERVIDOR = '10.81.112.113'     # Endereco IP do Servidor
 PORT_SERVIDOR = 5010        # Porta que o Servidor esta
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.bind((HOST_SERVIDOR, PORT_SERVIDOR))
@@ -24,7 +24,7 @@ def conexao():
                 if(cliente[0] in online.keys() and online[cliente[0]][2][1] != cliente[1]):
                     udp.sendto(b"USER NOK", online[cliente[0]][2])
                 nome_lista = comando[1] + ":" + cliente[0] + ":" + comando[2]
-                online[cliente[0]] = (nome_lista, time.time(), cliente)    
+                online.append((nome_lista, time.time(), cliente))    
                 mutex.release()
                 udp.sendto(b"USER OK", cliente)
             else:

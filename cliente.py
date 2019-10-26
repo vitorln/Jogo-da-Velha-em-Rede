@@ -4,7 +4,7 @@ import socket
 import time
 import threading
 
-IP_MAQUINA = '10.81.112.113'
+IP_MAQUINA = '192.168.25.30'
 
 class Conexao:
     def __init__(self, master):
@@ -162,9 +162,12 @@ class selecao:
             mensagem = str(mensagem).split(" ")
             mensagem[0] = mensagem[0][2:]
             mensagem[-1] = mensagem[-1][0:-1]
+            print (mensagem)
             if (mensagem[0] == "START"):
                 self.newWindow = Tk.Toplevel(self.master)
-                self.app = convite(self.newWindow, self.conexaoMaster, mensagem[1], self.con)
+                self.app = convite(self.newWindow, self.conexaoMaster, mensagem[1], self.con, self.udp, self.dest)
+            else:
+                self.con.close()
                   
     def __close_windows(self):
        
@@ -201,6 +204,7 @@ class selecao:
             elif(resposta[0] == "BYE"):
                 self.newWindow = Tk.Toplevel(self.master)
                 self.app = recusa(self.newWindow)
+                tcp_connect.close()
 
 class recusa:
     def __init__(self, master):
@@ -212,7 +216,7 @@ class recusa:
         self.container = Tk.Frame(self.master)
         self.container1 = Tk.Frame(self.container)
         self.lbl = Tk.Label(self.container, text="O jogador recusou o convite")
-        self.b_nega = Tk.Button(self.container1, text="Rejeitar",bg="red", fg="white", command = self.__retorna)
+        self.b_nega = Tk.Button(self.container1, text="Ok",bg="red", fg="white", command = self.__retorna)
 
         self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)        
         self.lbl.pack(side = Tk.TOP, padx = 8, pady=5)
@@ -222,9 +226,10 @@ class recusa:
     def __retorna(self):
         self.master.withdraw()
 
-
 class convite:
-    def __init__(self, master, conexaoMaster, desafiante, tcp):
+    def __init__(self, master, conexaoMaster, desafiante, tcp, udp, dest):
+        self.udp = udp
+        self.dest = dest
         self.desafiante = desafiante
         self.tcp = tcp
         self.conexaoMaster = conexaoMaster
@@ -252,13 +257,14 @@ class convite:
     def __aceita(self):
         print("aceita")
         self.tcp.send(b"START OK")
+        self.udp.sendto(b"EXIT", self.dest)
+        self.udp.close()
         self.master.withdraw()
+        self.newWindow = Tk.Toplevel(self.master)
+        self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp, False)
     
-
-
-
 class jogo:
-    def __init__(self, master, conexaoMaster, oi):
+    def __init__(self, master, conexaoMaster, tcp, desafiante = True):
         self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
         self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
         self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
