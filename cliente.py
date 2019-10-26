@@ -116,25 +116,28 @@ class selecao:
 
     def __conversa(self):                        
         while (True):
-            msg, cliente = self.udp.recvfrom(1024)
-            self.comando = str(msg).split(" ")
-            self.comando[0] = self.comando[0][2:]
-            self.comando[-1] = self.comando[-1][0:-1]
-            print(self.comando)
+            try:
+                msg, cliente = self.udp.recvfrom(1024)
+                self.comando = str(msg).split(" ")
+                self.comando[0] = self.comando[0][2:]
+                self.comando[-1] = self.comando[-1][0:-1]
+                print(self.comando)
 
-            if(self.comando[0] == "USER"):
-                if(self.comando[1] == "OK"):
-                    self.udp.sendto(b"LIST", self.dest)
-                elif(self.comando[1] == "NOK"):
-                    self.conexaoMaster.deiconify()
-                    self.master.withdraw()
-                    break
-            elif(self.comando[0] == "LIST"):
-                self.lista.delete('0','end')
-                tam = int(self.comando[1])
-                for i in range(2, tam + 2):
-                    if(self.comando[i] != self.usuario + ":" + IP_MAQUINA + ":" + self.minhaPorta):
-                        self.lista.insert(1, self.comando[i])
+                if(self.comando[0] == "USER"):
+                    if(self.comando[1] == "OK"):
+                        self.udp.sendto(b"LIST", self.dest)
+                    elif(self.comando[1] == "NOK"):
+                        self.conexaoMaster.deiconify()
+                        self.master.withdraw()
+                        break
+                elif(self.comando[0] == "LIST"):
+                    self.lista.delete('0','end')
+                    tam = int(self.comando[1])
+                    for i in range(2, tam + 2):
+                        if(self.comando[i] != self.usuario + ":" + IP_MAQUINA + ":" + self.minhaPorta):
+                            self.lista.insert(1, self.comando[i])
+            except:
+                break
 
     def __userLoop(self): 
         conexao = "USER " + self.usuario + " " + self.minhaPorta
@@ -201,7 +204,7 @@ class selecao:
                 self.udp.close()
                 self.master.withdraw()
                 self.newWindow = Tk.Toplevel(self.master)
-                self.app = jogo(self.newWindow, self.conexaoMaster, tcp_connect)
+                self.app = jogo(self.newWindow, self.conexaoMaster, tcp_connect, True)
             elif(resposta[0] == "BYE"):
                 self.newWindow = Tk.Toplevel(self.master)
                 self.app = recusa(self.newWindow)
@@ -315,6 +318,12 @@ class jogo:
         self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
 
         self.flag_sua_vez = False
+        self.t1 = threading.Thread(target=self.__loopJogo, args=())
+        self.t1.daemon = True
+        self.t1.start()
+        
+
+    def __loopJogo(self, desafiante):
         while(True):
             if(not desafiante):
                 self.__flipaVez(self.flag_sua_vez) 
@@ -325,7 +334,7 @@ class jogo:
                 if(jogada[0] == "PLAY"):
                     self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
                     desafiante = True
-
+        
     def __flipaVez(self, flag_sua_vez):
         if (flag_sua_vez):
             flag_sua_vez = False
