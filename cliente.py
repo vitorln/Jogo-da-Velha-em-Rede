@@ -462,8 +462,11 @@ class jogo:
         self.__flipaVez()
 
     def __close_windows(self):
-        self.tcp.send(b"BYE")
-        self.conexaoMaster.destroy()
+        try:
+            self.tcp.send(b"BYE")
+            self.conexaoMaster.destroy()
+        except:
+            self.conexaoMaster.destroy()
 
 
 def main(): 
