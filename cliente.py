@@ -280,7 +280,7 @@ class jogo:
         self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
         self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
         self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
-        self.tabuleiro = [[True, True, True], [True, True, True], [True, True, True]]
+        self.tabuleiro = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         self.conexaoMaster = conexaoMaster
         self.master = master
         self.master.wm_title("Jogo Da Velha")
@@ -343,7 +343,7 @@ class jogo:
                 jogada[0] = jogada[0][2:]
                 jogada[-1] = jogada[-1][0:-1]
                 if(jogada[0] == "PLAY"):
-                    if(int(jogada[1]) >= 0 and int(jogada[1]) < 3 and int(jogada[2]) >= 0 and int(jogada[2]) < 3 and self.tabuleiro[jogada[1]][jogada[2]]):
+                    if(int(jogada[1]) >= 0 and int(jogada[1]) < 3 and int(jogada[2]) >= 0 and int(jogada[2]) < 3 and self.tabuleiro[int(jogada[1])][int(jogada[2])] == 0):
                         self.desafiante = True
                         self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
                         self.tcp.send(b"PLAY OK")
@@ -363,23 +363,23 @@ class jogo:
             self.__activeB()
 
     def __activeB(self):
-        if(self.tabuleiro[0][0] == True):
+        if(self.tabuleiro[0][0] == 0):
             self.b11.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[0][1] == True):
+        if(self.tabuleiro[0][1] == 0):
             self.b12.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[0][2] == True):
+        if(self.tabuleiro[0][2] == 0):
             self.b13.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[1][0] == True):
+        if(self.tabuleiro[1][0] == 0):
             self.b21.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[1][1] == True):
+        if(self.tabuleiro[1][1] == 0):
             self.b22.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[1][2] == True):
+        if(self.tabuleiro[1][2] == 0):
             self.b23.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[2][0] == True):
+        if(self.tabuleiro[2][0] == 0):
             self.b31.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[2][1] == True):
+        if(self.tabuleiro[2][1] == 0):
             self.b32.config(state = Tk.ACTIVE)
-        if(self.tabuleiro[2][2] == True):
+        if(self.tabuleiro[2][2] == 0):
             self.b33.config(state = Tk.ACTIVE)
 
 
@@ -401,11 +401,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(0, 0, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -418,11 +418,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(0, 1, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -435,11 +435,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(0, 2, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -451,11 +451,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(1, 0, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -467,11 +467,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(1, 1, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -483,11 +483,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(1, 2, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -499,11 +499,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(2, 0, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -515,11 +515,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(2, 1, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -531,11 +531,11 @@ class jogo:
         resposta = str(resposta).split(" ")
         resposta[0] = resposta[0][2:]
         resposta[-1] = resposta[-1][0:-1]
-        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+        if(resposta[0] == "PLAY" and resposta[1] == "OK"):
             self.__jogado(2, 2, self.imagem_O)
             self.desafiante = False
             self.derrota = 0
-        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+        elif(resposta[0] == "PLAY" and resposta[1] == "NOK"):
             self.__flipaVez()
             self.derrota += 1
             if (derrota == 3):
@@ -566,58 +566,58 @@ class jogo:
             self.tabuleiro[linha][coluna] = 1
         elif(imagem == self.imagem_X):
             self.tabuleiro[linha][coluna] = 2
-        
-        self.__vencedor()
         self.__flipaVez()
+        self.__vencedor()
+        
 
 
     def __vencedor(self):
-        if(tabuleiro[0][0] == 1 and tabuleiro[0][1] == 1 and tabuleiro[0][2] == 1):
+        if(self.tabuleiro[0][0] == 1 and self.tabuleiro[0][1] == 1 and self.tabuleiro[0][2] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[1][0] == 1 and tabuleiro[1][1] == 1 and tabuleiro[1][2] == 1):
+        elif(self.tabuleiro[1][0] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[1][2] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[2][0] == 1 and tabuleiro[2][1] == 1 and tabuleiro[2][2] == 1):
+        elif(self.tabuleiro[2][0] == 1 and self.tabuleiro[2][1] == 1 and self.tabuleiro[2][2] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][0] == 1 and tabuleiro[1][0] == 1 and tabuleiro[2][0] == 1):
+        elif(self.tabuleiro[0][0] == 1 and self.tabuleiro[1][0] == 1 and self.tabuleiro[2][0] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][1] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][1] == 1):
+        elif(self.tabuleiro[0][1] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][1] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][2] == 1 and tabuleiro[1][2] == 1 and tabuleiro[2][2] == 1):
+        elif(self.tabuleiro[0][2] == 1 and self.tabuleiro[1][2] == 1 and self.tabuleiro[2][2] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][0] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][2] == 1):
+        elif(self.tabuleiro[0][0] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][2] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][2] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][0] == 1):
+        elif(self.tabuleiro[0][2] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][0] == 1):
             self.vez_jogador.config(text = "você venceu")
             self.__disableB()
-        elif(tabuleiro[0][0] == 2 and tabuleiro[0][1] == 2 and tabuleiro[0][2] == 2):
+        elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[0][1] == 2 and self.tabuleiro[0][2] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[1][0] == 2 and tabuleiro[1][1] == 2 and tabuleiro[1][2] == 2):
+        elif(self.tabuleiro[1][0] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[1][2] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[2][0] == 2 and tabuleiro[2][1] == 2 and tabuleiro[2][2] == 2):
+        elif(self.tabuleiro[2][0] == 2 and self.tabuleiro[2][1] == 2 and self.tabuleiro[2][2] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[0][0] == 2 and tabuleiro[1][0] == 2 and tabuleiro[2][0] == 2):
+        elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[1][0] == 2 and self.tabuleiro[2][0] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[0][1] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][1] == 2):
+        elif(self.tabuleiro[0][1] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][1] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[0][2] == 2 and tabuleiro[1][2] == 2 and tabuleiro[2][2] == 2):
+        elif(self.tabuleiro[0][2] == 2 and self.tabuleiro[1][2] == 2 and self.tabuleiro[2][2] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[0][0] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][2] == 2):
+        elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][2] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
-        elif(tabuleiro[0][2] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][0] == 12:
+        elif(self.tabuleiro[0][2] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][0] == 2):
             self.vez_jogador.config(text = "você perdeu")
             self.__disableB()
         
