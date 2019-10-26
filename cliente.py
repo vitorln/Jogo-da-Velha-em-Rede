@@ -319,7 +319,7 @@ class jogo:
         self.b31.pack(side = Tk.LEFT, padx = 8, pady=8)
         self.b32.pack(side = Tk.LEFT, padx = 8, pady=8)
         self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
-
+        self.derrota = 0
         self.flag_sua_vez = not desafiante
         self.__flipaVez()
         self.t1 = threading.Thread(target=self.__loopJogo, args=())
@@ -337,16 +337,18 @@ class jogo:
 
     def __loopJogo(self):
         while(True):
-            if(self.desafiante == False):
-                self.desafiante = True
-                 
+            if(self.desafiante == False):                 
                 jogada = self.tcp.recv(1024)
                 jogada = str(jogada).split(" ")
                 jogada[0] = jogada[0][2:]
                 jogada[-1] = jogada[-1][0:-1]
-                print(jogada)
                 if(jogada[0] == "PLAY"):
-                    self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
+                    if(int(jogada[1]) >= 0 and int(jogada[1]) < 3 and int(jogada[2]) >= 0 and int(jogada[2]) < 3 and self.tabuleiro[jogada[1]][jogada[2]]):
+                        self.desafiante = True
+                        self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
+                        self.tcp.send(b"PLAY OK")
+                    else:
+                        self.tcp.send(b"PLAY NOK")
                 elif(jogada[0] == "BYE"):
                     self.vez_jogador.config(text = "Oponente Desistiu")
         
@@ -393,77 +395,238 @@ class jogo:
         self.b33.config(state = Tk.DISABLED)
 
     def __botao11(self):
-        self.__jogado(1, 1, self.imagem_O)
-        self.tcp.send(b"PLAY 1 1")
-        self.desafiante = False
+        
+        self.tcp.send(b"PLAY 0 0")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(0, 0, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
+
 
     def __botao12(self):
-        self.__jogado(1, 2, self.imagem_O)
-        self.tcp.send(b"PLAY 1 2")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 0 1")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(0, 1, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
+
 
     def __botao13(self):
-        self.__jogado(1, 3, self.imagem_O)
-        self.tcp.send(b"PLAY 1 3")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 0 2")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(0, 2, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
  
     def __botao21(self):
-        self.__jogado(2, 1, self.imagem_O)
-        self.tcp.send(b"PLAY 2 1")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 1 0")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(1, 0, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
 
     def __botao22(self):
-        self.__jogado(2, 2, self.imagem_O)
-        self.tcp.send(b"PLAY 2 2")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 1 1")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(1, 1, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
 
     def __botao23(self):
-        self.__jogado(2, 3, self.imagem_O)
-        self.tcp.send(b"PLAY 2 3")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 1 2")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(1, 2, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
 
     def __botao31(self):
-        self.__jogado(3, 1, self.imagem_O)
-        self.tcp.send(b"PLAY 3 1")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 2 0")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(2, 0, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
 
     def __botao32(self):
-        self.__jogado(3, 2, self.imagem_O)
-        self.tcp.send(b"PLAY 3 2")
-        self.desafiante = False
-
+        self.tcp.send(b"PLAY 2 1")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(2, 1, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
+    
     def __botao33(self):
-        self.__jogado(3, 3, self.imagem_O)
-        self.tcp.send(b"PLAY 3 3")
-        self.desafiante = False
+        self.tcp.send(b"PLAY 2 2")
+        resposta = self.tcp.recv(1024)
+        resposta = str(resposta).split(" ")
+        resposta[0] = resposta[0][2:]
+        resposta[-1] = resposta[-1][0:-1]
+        if(respota[0] == "PLAY" and resposta[1] == "OK"):
+            self.__jogado(2, 2, self.imagem_O)
+            self.desafiante = False
+            self.derrota = 0
+        elif(respota[0] == "PLAY" and resposta[1] == "NOK"):
+            self.__flipaVez()
+            self.derrota += 1
+            if (derrota == 3):
+                self.udp.send(b"BYE")
 
     def __jogado(self, linha, coluna, imagem):
 
-        if  (linha == 1 and coluna == 1):
+        if  (linha == 0 and coluna == 0):
             self.b11.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 1 and coluna == 2):
+        elif  (linha == 0 and coluna == 1):
             self.b12.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 1 and coluna == 3):
+        elif  (linha == 0 and coluna == 2):
             self.b13.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 2 and coluna == 1):
+        elif  (linha == 1 and coluna == 0):
             self.b21.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 2 and coluna == 2):
+        elif  (linha == 1 and coluna == 1):
             self.b22.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 2 and coluna == 3):
+        elif  (linha == 1 and coluna == 2):
             self.b23.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 3 and coluna == 1):
+        elif  (linha == 2 and coluna == 0):
             self.b31.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 3 and coluna == 2):
+        elif  (linha == 2 and coluna == 1):
             self.b32.config(bg="gray", image = imagem, state = Tk.DISABLED)
-        elif  (linha == 3 and coluna == 3):
+        elif  (linha == 2 and coluna == 2):
             self.b33.config(bg="gray", image = imagem, state = Tk.DISABLED)
         
-        self.tabuleiro[linha - 1][coluna - 1] = False
+        if(imagem == self.imagem_O):
+            self.tabuleiro[linha][coluna] = 1
+        elif(imagem == self.imagem_X):
+            self.tabuleiro[linha][coluna] = 2
+        
+        self.__vencedor()
         self.__flipaVez()
+
+
+    def __vencedor(self):
+        if(tabuleiro[0][0] == 1 and tabuleiro[0][1] == 1 and tabuleiro[0][2] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[1][0] == 1 and tabuleiro[1][1] == 1 and tabuleiro[1][2] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[2][0] == 1 and tabuleiro[2][1] == 1 and tabuleiro[2][2] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][0] == 1 and tabuleiro[1][0] == 1 and tabuleiro[2][0] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][1] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][1] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][2] == 1 and tabuleiro[1][2] == 1 and tabuleiro[2][2] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][0] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][2] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][2] == 1 and tabuleiro[1][1] == 1 and tabuleiro[2][0] == 1):
+            self.vez_jogador.config(text = "você venceu")
+            self.__disableB()
+        elif(tabuleiro[0][0] == 2 and tabuleiro[0][1] == 2 and tabuleiro[0][2] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[1][0] == 2 and tabuleiro[1][1] == 2 and tabuleiro[1][2] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[2][0] == 2 and tabuleiro[2][1] == 2 and tabuleiro[2][2] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[0][0] == 2 and tabuleiro[1][0] == 2 and tabuleiro[2][0] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[0][1] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][1] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[0][2] == 2 and tabuleiro[1][2] == 2 and tabuleiro[2][2] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[0][0] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][2] == 2):
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        elif(tabuleiro[0][2] == 2 and tabuleiro[1][1] == 2 and tabuleiro[2][0] == 12:
+            self.vez_jogador.config(text = "você perdeu")
+            self.__disableB()
+        
+
 
     def __close_windows(self):
         try:
             self.tcp.send(b"BYE")
+            self.tcp.close()
             self.conexaoMaster.destroy()
         except:
             self.conexaoMaster.destroy()
