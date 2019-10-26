@@ -273,7 +273,7 @@ class jogo:
     def __init__(self, master, conexaoMaster, tcp, desafiante = True):
 
         self.tcp = tcp
-
+        self.desafiante = desafiante
         self.imagem_X = Tk.PhotoImage(file = r"X.png").subsample(2, 2)
         self.imagem_O = Tk.PhotoImage(file = r"O.png").subsample(2, 2)
         self.imagem_vazio = Tk.PhotoImage(file = r"vazio.png").subsample(2, 2)
@@ -318,7 +318,7 @@ class jogo:
         self.b33.pack(side = Tk.LEFT, padx = 8, pady=8)
 
         self.flag_sua_vez = False
-        self.t1 = threading.Thread(target=self.__loopJogo, args=())
+        self.t1 = threading.Thread(target=self.__loopJogo, args=(self.desafiante))
         self.t1.daemon = True
         self.t1.start()
         
@@ -347,37 +347,47 @@ class jogo:
     def __botao11(self):
         self.__jogado(1, 1, self.imagem_O)
         self.tcp.send(b"PLAY 1 1")
+        self.desafiante = False
+
     def __botao12(self):
         self.__jogado(1, 2, self.imagem_O)
         self.tcp.send(b"PLAY 1 2")
+        self.desafiante = False
 
     def __botao13(self):
         self.__jogado(1, 3, self.imagem_O)
         self.tcp.send(b"PLAY 1 3")
+        self.desafiante = False
  
     def __botao21(self):
         self.__jogado(2, 1, self.imagem_O)
         self.tcp.send(b"PLAY 2 1")
+        self.desafiante = False
 
     def __botao22(self):
         self.__jogado(2, 2, self.imagem_O)
         self.tcp.send(b"PLAY 2 2")
+        self.desafiante = False
 
     def __botao23(self):
         self.__jogado(2, 3, self.imagem_O)
         self.tcp.send(b"PLAY 2 3")
+        self.desafiante = False
 
     def __botao31(self):
         self.__jogado(3, 1, self.imagem_O)
         self.tcp.send(b"PLAY 3 1")
+        self.desafiante = False
 
     def __botao32(self):
         self.__jogado(3, 2, self.imagem_O)
         self.tcp.send(b"PLAY 3 2")
+        self.desafiante = False
 
     def __botao33(self):
         self.__jogado(3, 3, self.imagem_O)
         self.tcp.send(b"PLAY 3 3")
+        self.desafiante = False
 
     def __jogado(self, linha, coluna, imagem):
 
