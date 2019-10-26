@@ -168,8 +168,8 @@ class selecao:
             print (mensagem)
             if (mensagem[0] == "START"):
                 self.newWindow = Tk.Toplevel(self.master)
-                self.master.withdraw()
-                self.app = convite(self.newWindow, self.conexaoMaster, mensagem[1], self.con, self.udp, self.dest)
+                
+                self.app = convite(self.newWindow, self.conexaoMaster, self.master, mensagem[1], self.con, self.udp, self.dest)
             else:
                 self.con.close()
                   
@@ -234,9 +234,10 @@ class recusa:
         self.master.withdraw()
 
 class convite:
-    def __init__(self, master, conexaoMaster, desafiante, tcp, udp, dest):
+    def __init__(self, master, conexaoMaster, selecaoMaster, desafiante, tcp, udp, dest):
         self.udp = udp
         self.dest = dest
+        self.selecaoMaster = selecaoMaster
         self.desafiante = desafiante
         self.tcp = tcp
         self.conexaoMaster = conexaoMaster
@@ -267,6 +268,7 @@ class convite:
         self.udp.sendto(b"EXIT", self.dest)
         self.udp.close()
         self.master.withdraw()
+        self.selecaoMaster.withdraw()
         self.newWindow = Tk.Toplevel(self.master)
         self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp, False)
     
@@ -324,6 +326,14 @@ class jogo:
         self.t1.daemon = True
         self.t1.start()
         
+    def __verificaSair(self):
+        jogada = self.tcp.recv(1024)
+        jogada = str(jogada).split(" ")
+        jogada[0] = jogada[0][2:]
+        jogada[-1] = jogada[-1][0:-1]
+        print(jogada)
+        if(jogada[0] == "BYE"):
+            self.vez_jogador.config(text = "Oponente Desistiu")
 
     def __loopJogo(self):
         while(True):
@@ -337,6 +347,8 @@ class jogo:
                 print(jogada)
                 if(jogada[0] == "PLAY"):
                     self.__jogado(int(jogada[1]), int(jogada[2]), self.imagem_X)
+                elif(jogada[0] == "BYE"):
+                    self.vez_jogador.config(text = "Oponente Desistiu")
         
     def __flipaVez(self):
         if (self.flag_sua_vez):
@@ -450,6 +462,7 @@ class jogo:
         self.__flipaVez()
 
     def __close_windows(self):
+        self.tcp.send(b"BYE")
         self.conexaoMaster.destroy()
 
 
