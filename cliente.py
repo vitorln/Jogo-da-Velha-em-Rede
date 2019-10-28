@@ -3,6 +3,7 @@ import tkinter as Tk
 import socket
 import time
 import threading
+import random
 
 IP_MAQUINA = '192.168.25.30'
 
@@ -85,10 +86,10 @@ class selecao:
         self.master.wm_title("conexão com servidor")
         self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
         self.container = Tk.Frame(self.master)
-        self.lista = Tk.Listbox(self.container)
+        self.lista = Tk.Listbox(self.container, width=30)
         self.container2 = Tk.Frame(self.container)
-        self.b_select = Tk.Button(self.container2, text="partida selecionada" ,command=self.__selecionado, bg="blue", fg="white", width=15)
-        self.b_rand = Tk.Button(self.container2, text="partida aleatoria", command=self.__aleatorio,bg="blue", fg="white", width=15)
+        self.b_select = Tk.Button(self.container2, text="Partida selecionada" ,command=self.__selecionado, bg="blue", fg="white", width=15)
+        self.b_rand = Tk.Button(self.container2, text="Partida aleatória", command=self.__aleatorio,bg="blue", fg="white", width=15)
         self.espaco = Tk.LabelFrame(self.container2, height = 50)
         self.b_sair = Tk.Button(self.container2, text="Sair", command=self.__close_windows, bg="red", fg="white", width=15)
 
@@ -180,12 +181,35 @@ class selecao:
         self.conexaoMaster.destroy()
 
     def __aleatorio(self):
-        print("foi rand")
-        self.udp.sendto(b"EXIT", self.dest)
-        self.udp.close()
-        self.master.withdraw()
-        self.newWindow = Tk.Toplevel(self.master)
-        self.app = jogo(self.newWindow, self.conexaoMaster, self.tcp_connect)
+        #try:
+            tcp_connect = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
+            item = random.randint(0, self.lista.size()-1)
+            print(self.lista.curselection())
+            print(item)
+            select = self.lista.get((item,))            
+            #select = self.lista.get(self.lista.curselection())
+            select = select.split(":")
+            oponente = (select[1], int(select[2]))
+            tcp_connect.connect((select[1], int(select[2])))
+            tcp_connect.send(bytes("START " + self.usuario, encoding='utf8'))
+            
+            resposta = tcp_connect.recv(1024)
+            resposta = str(resposta).split(" ")
+            resposta[0] = resposta[0][2:]
+            resposta[-1] = resposta[-1][0:-1]
+            if (resposta[0] == "START"):
+                self.udp.sendto(b"EXIT", self.dest)
+                self.udp.close()
+                self.master.withdraw()
+                self.newWindow = Tk.Toplevel(self.master)
+                self.app = jogo(self.newWindow, self.conexaoMaster, tcp_connect, True)
+            elif(resposta[0] == "BYE"):
+                self.newWindow = Tk.Toplevel(self.master)
+                self.app = recusa(self.newWindow)
+                tcp_connect.close()
+        #except:
+        #    print("erro na seleção")
 
     def __selecionado(self):
         try:
@@ -573,52 +597,52 @@ class jogo:
 
     def __vencedor(self):
         if(self.tabuleiro[0][0] == 1 and self.tabuleiro[0][1] == 1 and self.tabuleiro[0][2] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[1][0] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[1][2] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[2][0] == 1 and self.tabuleiro[2][1] == 1 and self.tabuleiro[2][2] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][0] == 1 and self.tabuleiro[1][0] == 1 and self.tabuleiro[2][0] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][1] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][1] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][2] == 1 and self.tabuleiro[1][2] == 1 and self.tabuleiro[2][2] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][0] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][2] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][2] == 1 and self.tabuleiro[1][1] == 1 and self.tabuleiro[2][0] == 1):
-            self.vez_jogador.config(text = "você venceu")
+            self.vez_jogador.config(text = "Você venceu")
             self.__disableB()
         elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[0][1] == 2 and self.tabuleiro[0][2] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[1][0] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[1][2] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[2][0] == 2 and self.tabuleiro[2][1] == 2 and self.tabuleiro[2][2] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[1][0] == 2 and self.tabuleiro[2][0] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[0][1] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][1] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[0][2] == 2 and self.tabuleiro[1][2] == 2 and self.tabuleiro[2][2] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[0][0] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][2] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         elif(self.tabuleiro[0][2] == 2 and self.tabuleiro[1][1] == 2 and self.tabuleiro[2][0] == 2):
-            self.vez_jogador.config(text = "você perdeu")
+            self.vez_jogador.config(text = "Você perdeu")
             self.__disableB()
         
 
