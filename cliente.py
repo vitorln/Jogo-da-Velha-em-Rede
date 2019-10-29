@@ -5,7 +5,7 @@ import time
 import threading
 import random
 
-IP_MAQUINA = '192.168.25.30'
+
 
 class Conexao:
     def __init__(self, master):
@@ -13,9 +13,10 @@ class Conexao:
         self.texto = self.arq.read()
         self.salvos = self.texto.split("\n")
         self.arq.close()
-        
-        self.x1, self.x2 = self.salvos[0].split()
-        self.y1, self.y2 = self.salvos[1].split()
+        self.ip2 = Tk.StringVar()
+        self.ip2.set(self.salvos[0])
+        self.x1, self.x2 = self.salvos[1].split()
+        self.y1, self.y2 = self.salvos[2].split()
         self.ip = Tk.StringVar()
         self.ip.set(self.x1)
         self.porta = Tk.StringVar()
@@ -29,6 +30,9 @@ class Conexao:
         self.master.wm_title("conexão com servidor")
         self.master.wm_protocol('WM_DELETE_WINDOW', self.master.quit)
         self.container = Tk.Frame(self.master)
+        self.container0 = Tk.Frame(self.container)
+        self.lbl = Tk.Label(self.container0, text="Endereco da maquina: ", anchor = Tk.W, width = 18)
+        self.ipMaquina = Tk.Entry(self.container0, width=15, textvariable = self.ip2)
         self.container1 = Tk.Frame(self.container)
         self.lbl1 = Tk.Label(self.container1, text="Endereco do servidor: ", anchor = Tk.W, width = 18)
         self.ipText = Tk.Entry(self.container1, width=15, textvariable = self.ip)
@@ -44,6 +48,9 @@ class Conexao:
         self.b_porta = Tk.Button(self.container, text="conectar", command=self.__conecta ,bg="blue", fg="white")
 
         self.container.pack(side = Tk.TOP, expand = 1, pady = 5, padx = 10)        
+        self.container0.pack()
+        self.lbl.pack(side = Tk.LEFT, padx = 8, pady=5)
+        self.ipMaquina.pack(side = Tk.RIGHT)
         self.container1.pack()
         self.lbl1.pack(side = Tk.LEFT, padx = 8, pady=5)
         self.ipText.pack(side = Tk.RIGHT)
@@ -63,19 +70,20 @@ class Conexao:
         port = int(self.portaText.get())  # Porta que o Servidor esta
         usuario = self.nickText.get()
         minhaPorta = self.porta2Text.get()
+        meuIp = self.ipMaquina.get()
         arq = open('./Servidor.txt', 'w')
-        texto = host + " " + str(port) + "\n" + usuario + " " + minhaPorta
+        texto = meuIp + "\n" + host + " " + str(port) + "\n" + usuario + " " + minhaPorta
         arq.write(texto)
         arq.close()
         self.master.withdraw()
         self.newWindow = Tk.Toplevel(self.master)
-        self.app = selecao(self.newWindow, self.master, host, port, usuario, minhaPorta)
+        self.app = selecao(self.newWindow, self.master, host, port, usuario, minhaPorta, meuIp)
 
 class selecao:
-    def __init__(self, master, conexaoMaster, host, port, usuario, minhaPorta):
+    def __init__(self, master, conexaoMaster, host, port, usuario, minhaPorta, meuIp):
         self.udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.dest = (host, port)
-
+        self.ip = meuIp
         self.master = master
         self.conexaoMaster = conexaoMaster
         self.host = host
@@ -135,7 +143,7 @@ class selecao:
                     self.lista.delete('0','end')
                     tam = int(self.comando[1])
                     for i in range(2, tam + 2):
-                        if(self.comando[i] != self.usuario + ":" + IP_MAQUINA + ":" + self.minhaPorta):
+                        if(self.comando[i] != self.usuario + ":" + self.ip + ":" + self.minhaPorta):
                             self.lista.insert(1, self.comando[i])
             except:
                 break
@@ -155,7 +163,7 @@ class selecao:
     
     def __convite(self):
         tcp_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        orig = (IP_MAQUINA, int(self.minhaPorta))
+        orig = (self.ip, int(self.minhaPorta))
         tcp_listen.bind(orig)
 
         tcp_listen.listen(1)
@@ -188,7 +196,7 @@ class selecao:
             print(self.lista.curselection())
             print(item)
             select = self.lista.get((item,))            
-            #select = self.lista.get(self.lista.curselection())
+            
             select = select.split(":")
             oponente = (select[1], int(select[2]))
             tcp_connect.connect((select[1], int(select[2])))

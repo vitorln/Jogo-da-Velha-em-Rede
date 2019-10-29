@@ -4,7 +4,7 @@ import threading
 
 
 online = {}
-HOST_SERVIDOR = '192.168.25.30'     # Endereco IP do Servidor
+HOST_SERVIDOR = '10.81.71.153'     # Endereco IP do Servidor
 PORT_SERVIDOR = 5010        # Porta que o Servidor esta
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.bind((HOST_SERVIDOR, PORT_SERVIDOR))
